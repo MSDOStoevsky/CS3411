@@ -1,0 +1,11 @@
+Server program successfully creates a socket and listens for connections.
+
+Client program successfully connects to a host/port pair.
+
+Server can accept multiple successive connections
+
+Server distributes messages to all clients successfully
+
+A client can quit and a new one can connect while the server keeps operating successfully
+
+(Extra credit!) Clients take preventative measures to stop messages from distributing the user's message typing.

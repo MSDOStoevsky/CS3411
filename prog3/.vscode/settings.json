@@ -1,0 +1,20 @@
+{
+    "files.associations": {
+        "unistd.h": "c",
+        "string.h": "c",
+        "cstdlib": "c",
+        "stat.h": "c",
+        "mman-common.h": "c",
+        "time.h": "c",
+        "fcntl.h": "c",
+        "types.h": "c",
+        "mman.h": "c",
+        "wait.h": "c",
+        "stdio2.h": "c",
+        "stdlib.h": "c",
+        "stdio.h": "c",
+        "socket.h": "c",
+        "c++config.h": "c",
+        "libio.h": "c"
+    }
+}

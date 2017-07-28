@@ -1,0 +1,11 @@
+# Dealer tests
+./dealer
+./dealer 0
+./dealer 1
+./dealer 2
+./dealer 13
+./dealer 20
+
+# Player tests
+./player (without dealer)
+./player (with dealer)

@@ -1,0 +1,9 @@
+Simple shell displays the prompt. TRUE
+Simple shell runs a basic program. TRUE
+Simple shell runs a basic program with arguments. TRUE
+Simple shell does input redirection successfully. FALSE
+Simple shell does output redirection successfully. TRUE
+Simple shell correctly implements pipes between 2 processes. TRUE
+Simple shell correctly implements pipes between more than 2 processes. TRUE
+Simple shell correctly implements input / output redirection with pipes involved. Only with output redirection.
+[EXTRA CREDIT!] Simple shell implements cd and can change directories!  TRUE

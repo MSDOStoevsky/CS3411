@@ -1,0 +1,7 @@
+Server program successfully creates a socket and listens for connections.  TRUE
+
+Client program successfully connects to a host/port pair. TRUE
+
+Server can accept multiple successive connections TRUE
+
+Server executes program successfully and client outputs the results as expected. TRUE

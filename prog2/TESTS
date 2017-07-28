@@ -1,0 +1,29 @@
+test is a simple program that prints "Hello!"
+and if an argument x is supplied it prints "Hello, x!"
+
+# cd test
+cd ..
+cd /
+cd cd projects/prog2/
+cd test
+
+# run program test
+./test
+./test Dylan
+
+# pipe test
+./test Dylan | wc | grep a
+./test Dylan | wc | grep 1
+
+./test Dylan | grep D
+./test Dylan | grep D | grep y
+./test Dylan | grep D | grep z
+
+# io redirect test
+./test Dylan | grep e > out
+./test Dylan > out | grep w
+./test | grep e | sort | wc > testfile
+
+# does not work
+./test Dylan | grep e < in
+./test Dylan | grep e > out < in

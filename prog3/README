@@ -1,0 +1,30 @@
+1. Program spawns the correct number of processes.
+
+./dealer <n>, will spawn n processes
+
+
+2. Program generates a legal deck.
+
+true
+
+
+3. Program correctly sends integers to child processes.
+
+true
+
+
+4. Program successfully simulates a full game.
+
+Not sure what that entails. Otherwise works with external players.
+
+
+5. Program successfully works with an externally written player program.
+
+Running player will automatically connect to dealer and receive four cards.
+Can recognize a tie, but does not reliably handle it.
+
+
+6. [EXTRA CREDIT!] Program can detect a cheating player program.
+
+dealer will know if the player sends a total that was not given to them.
+

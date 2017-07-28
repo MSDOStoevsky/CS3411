@@ -1,0 +1,10 @@
+{
+    "files.associations": {
+        "limits": "cpp",
+        "cstdlib": "cpp",
+        "fcntl.h": "c",
+        "signal.h": "c",
+        "time.h": "c",
+        "unistd.h": "c"
+    }
+}

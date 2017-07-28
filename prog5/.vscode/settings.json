@@ -1,0 +1,14 @@
+{
+    "files.associations": {
+        "cstdlib": "c",
+        "c++config.h": "c",
+        "unistd.h": "c",
+        "netdb.h": "c",
+        "string.h": "c",
+        "sigcontext.h": "c",
+        "fcntl.h": "c",
+        "signal.h": "c",
+        "time.h": "c",
+        "mman.h": "c"
+    }
+}

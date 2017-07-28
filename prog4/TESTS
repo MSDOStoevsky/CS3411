@@ -1,0 +1,17 @@
+./reserver
+./reserver &
+
+# with server running
+./reclient
+./reclient localhost
+./reclient 127.0.0.1
+./reclient 127.0.0.1 (port) ls
+./reclient 127.0.0.1 (port) ls -lrt
+./reclient 127.0.0.1 (port) ls -lrt ../
+./reclient 127.0.0.1 (port) pwd
+
+# without server running
+./reclient
+./reclient localhost
+./reclient 127.0.0.1
+./reclient 127.0.0.1 (port) ls
