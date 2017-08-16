@@ -8,14 +8,14 @@
 #include <stdlib.h>
 #include <string.h>
 #include <sys/mman.h>
-#include <sys/socket.h>
 #include <sys/stat.h>
 #include <sys/types.h>
 #include <sys/un.h>
 #include <sys/wait.h>
 #include <unistd.h>
 #include <time.h>
-#define PORTNO 5021
+#define READ  0
+#define WRITE 1
 
 /**********************************/
 /* Author: Dylan Lettinga         */
@@ -43,35 +43,6 @@ int pop(int *arr, int *size, int loc)
     *size = *size-1;
     return val;
 }
-/* 
-    send values to player and return response
-*/
-int sendtop (int sock, int *cards, int player) {
-    int total, index;
-    char buffer[256];
-    bzero(buffer,256);
-    for(index = 0; index < 4; index++)
-    {
-        if (write(sock,&(cards[index]),(size_t)sizeof(int)) < 0) {
-            write(STDERR_FILENO, "could not deal cards to player\n", 30);
-            exit(EXIT_FAILURE);
-        }
-    }
-    if (read(sock,&total,(size_t)sizeof(total)) < 0) {
-        write(STDERR_FILENO, "could not read players total\n", 29);
-        exit(EXIT_FAILURE);
-    }
-    
-    /* ignore outrageous totals */
-    if(total < 4 || total > 52)
-    {
-        write(STDOUT_FILENO, "received bad total from player\n", 31);
-        return 0;
-    }
-    sprintf(buffer, "player %d's total was: %d\n", player, total);
-    write(STDOUT_FILENO, buffer, sizeof(buffer));
-    return total;
-}
 /*
     send result of game to player
 */
@@ -89,16 +60,17 @@ void refresharr(int *arr)
 }
 int main(int argc, char* argv[])
 {
-    pid_t pid, wpid;
-    socklen_t clilen;
+    pid_t pid;
     int sockfd, newsockfd;
     int status, player, players, total;
     int card, rdm_card, draw;
-    struct sockaddr_in serv_addr, cli_addr;
+    int fd [2];
     int deal[4];
     int deck[52] = 
     {1,1,1,1,2,2,2,2,3,3,3,3,4,4,4,4,5,5,5,5,6,6,6,6,7,7,7,7,8,8,8,8,9,9,9,9,10,10,10,10,11,11,11,11,12,12,12,12,13,13,13,13};
     char buffer[256];
+    char cardbuff[2];
+    bzero(deal,5);
     bzero(buffer,256);
 
     /* initialize deck size*/
@@ -131,32 +103,9 @@ int main(int argc, char* argv[])
             exit(EXIT_FAILURE);
         }
     }
-
-    /* create socket */
-    sockfd = socket(AF_INET, SOCK_STREAM, 0);
-    if (sockfd < 0) {
-        write(STDERR_FILENO, "socket error: open\n", 19);
-        exit(EXIT_FAILURE);
-    }
-
-    /* build out socket components */
-    bzero((char *) &serv_addr, sizeof(serv_addr));
-    serv_addr.sin_family = (short) AF_INET;
-    serv_addr.sin_addr.s_addr = htonl(INADDR_ANY);
-    serv_addr.sin_port = htons(PORTNO);
-
-    /* bind */
-    if (bind(sockfd, (struct sockaddr *) &serv_addr, sizeof(serv_addr)) < 0) {
-        write(STDERR_FILENO, "socket error: bind\n", 19);
-        exit(EXIT_FAILURE);
-    }
-
-    listen(sockfd,5);
-    clilen = sizeof(cli_addr);
     
     /* seed random and begin loop */
     srand ( time(NULL) );
-    player = 0;
     for(player = 1; player <= players; player++)
     {
         /* generate new deck if out of cards */
@@ -166,71 +115,55 @@ int main(int argc, char* argv[])
             deck_size = 52;
         }
 
-        /* Accept connection(s) */
-        newsockfd = accept(sockfd, (struct sockaddr *)&cli_addr, &clilen);
-        if (newsockfd < 0) {
-            write(STDERR_FILENO, "socket error: accept\n", 21);
-            exit(EXIT_FAILURE);
-        }
-        
         /* draw 4 cards to send to player */
         for(card = 0; card < 4; card++)
         {
             rdm_card = rand() % deck_size;
-            draw = pop(deck, &deck_size, rdm_card);
-            deal[card] = draw;
-            sprintf(buffer, "dealing card %d to player %d\n", draw, player);
-            write(STDOUT_FILENO, buffer, sizeof(buffer));
+            deal[card] = pop(deck, &deck_size, rdm_card);
         }
 
+        if( pipe(fd) == -1)
+        {
+            write(STDERR_FILENO, "pipe error\n", 11);
+            exit(EXIT_FAILURE);
+        }
         pid = fork();
         if (pid == 0) {
-            close(sockfd);
+            close(STDIN_FILENO);
+            dup2(fd[READ], STDIN_FILENO);
 
-            /* send hand to player and retreive the total */
-            total = sendtop(newsockfd, deal, player);
+            write(fd[WRITE], &deal[0], sizeof(int));
+            if (execvp( "./player", NULL) == -1){
+                write(STDERR_FILENO, "Execution error\n", 16);
+                exit(EXIT_FAILURE);
+            }
+            while (read(fd[READ], &total, sizeof(int)) > 0)
+                write(STDOUT_FILENO, &total, sizeof(int));
+            close(fd[WRITE]);
 
-            /* check if current player is winning */
-            if(total < *highest_total)
-            {
-                sendres(newsockfd, -1);
-                sprintf(buffer, "player %d is knocked out, with a score of %d\n", player, total);
-                write(STDOUT_FILENO, buffer, sizeof(buffer));
+            /*
+            write(STDOUT_FILENO, deal, sizeof(deal));
+            dup2( fd[WRITE], STDOUT_FILENO );
+            
+            printf("%s, %s, %s", deal[0], deal[1], deal[2]);
+            if (execvp( deal[0], NULL) == -1){
+                write(STDERR_FILENO, "Execution error\n", 16);
+                exit(EXIT_FAILURE);
             }
-            else if(total > *highest_total)
-            {
-                if(*winning != 0){
-                    sendres(*winning_fd, -1);
-                    sprintf(buffer, "player %d is knocked out, with a score of %d\n", *winning, *highest_total);
-                    write(STDOUT_FILENO, buffer, sizeof(buffer));
-                }
-                /* set curr winner to curr player connection */
-                *winning = player;
-                *winning_fd = newsockfd;
-                *highest_total = total;
-            }
-            else
-            {  
-                sendres(newsockfd, 0);
-                sendres(*winning_fd, 0);
-                sprintf(buffer, "player %d has tied with player %d\n", player, *winning);
-                write(STDOUT_FILENO, buffer, sizeof(buffer));
-            }
+            printf("test\n");*/
 
-            exit(EXIT_SUCCESS);
         } else if (pid < 0) {
             write(STDERR_FILENO, "fork error\n", 11);
             exit(EXIT_FAILURE);
         } else {
-            /*close(newsockfd);*/
-            do {
-                wpid = waitpid(pid, &status, WUNTRACED);
-            } while (!WIFEXITED(status) && !WIFSIGNALED(status));
+            close(fd[READ]);
+            wait(NULL);                /* Wait for child */
+            exit(EXIT_SUCCESS);
         }
     }
 
-    sendres(*winning_fd, 1);
-    sprintf(buffer, "the winner is: player %d, with a score of %d!\n", *winning, *highest_total);
+    /*sendres(*winning_fd, 1);*/
+    sprintf(buffer, "total read was %d\n", total);
     write(STDOUT_FILENO, buffer, sizeof(buffer));
     return 0;
 }

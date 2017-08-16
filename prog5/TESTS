@@ -1,0 +1,10 @@
+./cserver
+./cserver &
+
+./cclient localhost [port] a
+./cclient localhost [port] aaaaaaaaaaaaaaaaaa
+./cclient localhost [port] a a
+    > Hello?
+    testing character limits:
+    > aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+    aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa

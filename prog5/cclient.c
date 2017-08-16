@@ -13,6 +13,7 @@
 
 #define h_addr h_addr_list[0]
 #define BUFFERSIZE 128
+#define IBUFFERSIZE 182
 
 /**********************************/
 /* Author: Dylan Lettinga         */
@@ -27,9 +28,9 @@ int main(int argc, char* argv[])
     struct hostent *server;
 
     char buffer[BUFFERSIZE];
-    char inbuffer[BUFFERSIZE];
+    char ibuffer[IBUFFERSIZE];
     bzero(buffer,BUFFERSIZE);
-    bzero(inbuffer,BUFFERSIZE);
+    bzero(ibuffer,IBUFFERSIZE);
 
     /* reject an execution with no arguments */
     if(argv[1] == NULL || argv[2] == NULL || argv[3] == NULL)
@@ -94,14 +95,11 @@ int main(int argc, char* argv[])
         exit(EXIT_FAILURE);
     } else {
         /* read other client chat messages */
-        while(1)
+        while(read(sockfd, ibuffer, IBUFFERSIZE) > 0)
         {
-            if(read(sockfd, inbuffer, BUFFERSIZE) < 0){
-                write(STDERR_FILENO, "ERROR reading from socket\n", 26);
-                exit(EXIT_FAILURE);
-            }
-            write(STDOUT_FILENO, inbuffer, BUFFERSIZE);
+            write(STDOUT_FILENO, ibuffer, IBUFFERSIZE);
         }
+        write(STDERR_FILENO, "Connection to the server has been lost.\n", 40);
         /* be parental */
         do {
             wpid = waitpid(pid, &status, WUNTRACED);
